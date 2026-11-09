@@ -28,7 +28,7 @@
     },
     {
       "path": "RIGHTS.md",
-      "sha256": "5b75d261c4ba409634c9745fe1efb5dc181f4aa5f027370dc59dfce8ba1774d0"
+      "sha256": "ab86dcbdd4ea7639f0c6aa52c8b1a4c058b442544e67d63971dcb34c731c8e10"
     },
     {
       "path": "SOURCE-NOTICE.md",
@@ -40,7 +40,7 @@
     },
     {
       "path": "VALIDATION.md",
-      "sha256": "a06360bfc19eb40fd9a9419c1de2d05fabb9fcb8a4b9f346936cd470937ed548"
+      "sha256": "70a648f6ddbd9f7e1cab722488e0f18a0f6bb12b964fa167e576743474732988"
     },
     {
       "path": "app/accounts/demo/page.tsx",
@@ -104,7 +104,7 @@
     },
     {
       "path": "assets/social-a-portfolio-ko.pdf",
-      "sha256": "565f54191cda83005f9ad886469de7c1071cd08b6ce3245540b04f5acbc448d9"
+      "sha256": "2a2e6e2a46388866e8eee7f74e927c934a6cddc8eeffce0dd4349f5d5fc0cc47"
     },
     {
       "path": "components/account-onboarding.tsx",

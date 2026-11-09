@@ -19,4 +19,4 @@
 
 별도 작업 저장소에서는 사용자 OAuth 동의 후 실제 계정의 수집→로컬 Codex 생성→저장·별도 프로세스 재조회를 확인했다. 이는 이 공개 데모에서 실제 연결할 수 있다는 주장이 아니며, 운영 데이터·인증값·관련 실행기는 이 패키지에 없다. 개선된 생성 지시의 추가 실제 재생성이나 모든 초안의 사람 품질 승인을 주장하지 않는다.
 
-시연 순서는 [DEMO-WALKTHROUGH.md](DEMO-WALKTHROUGH.md), 권리는 [RIGHTS.md](RIGHTS.md), 출처는 [SOURCE-NOTICE.md](SOURCE-NOTICE.md)를 따른다. 현재 원격 공개·push·배포는 하지 않았다.
+시연 순서는 [DEMO-WALKTHROUGH.md](DEMO-WALKTHROUGH.md), 권리는 [RIGHTS.md](RIGHTS.md), 출처는 [SOURCE-NOTICE.md](SOURCE-NOTICE.md)를 따른다. 2026-11-09 공개 패키지를 새 폴더에 풀어 설치·빌드·타입 검사·린트를 통과했다. 해당 서버에서 공개 데모 테스트 4개가 통과했으며, 검수한 소스를 GitHub에 게시했다.
