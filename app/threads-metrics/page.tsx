@@ -1,0 +1,24 @@
+import { PageHeader, FilterPanel, Kpi, Empty } from '@/components/shared';
+import { metricsSnapshot } from '@/lib/metrics-service';
+import { readFilters, number, type SearchParams } from '@/lib/view';
+
+export default async function Metrics({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const filters = readFilters(await searchParams, 1);
+  const data = filters.error ? null : metricsSnapshot(filters.start, filters.end);
+  const rows = data?.accounts.filter(row => filters.visible.some(a => a.id === row.id)) ?? [];
+  const total = (values: (number | null)[]) => values.every(v => v === null) ? null : values.reduce<number>((sum, value) => sum + (value ?? 0), 0);
+  const signed = (n: number | null) => n == null ? '—' : `${n > 0 ? '+' : ''}${number(n)}`;
+  return <><PageHeader eyebrow="THREADS METRICS" title="날짜로 읽는 변화" description="원글 조회, 프로필 관측 증가량과 팔로워 변화를 함께 살펴보세요." /><FilterPanel key={`${filters.start}-${filters.end}-${filters.owner}-${filters.query}`} filters={filters} path="/threads-metrics/" />
+    {data && (rows.length ? <>
+      <div className="boundary-note"><span aria-hidden="true">◷</span><div><strong>KST 16:00 기준 · {filters.days}일</strong><p>{data.start_boundary.replace('T', ' ').slice(0, 16)} UTC ~ {data.end_boundary.replace('T', ' ').slice(0, 16)} UTC · 시작일 전날 16시부터 종료일 16시까지</p></div><span className="badge">관측 기반</span></div>
+      <div className="kpi-grid"><Kpi label="원글 조회 증가" value={signed(total(rows.map(row => row.posts.views_delta)))} note="조회 가능한 원글의 관측 증가량 합계" accent /><Kpi label="프로필 관측 증가" value={signed(total(rows.map(row => row.profile.value)))} note="일별 초기화 반영 · 방문 총합과 다름" /><Kpi label="팔로워 변화" value={signed(total(rows.map(row => row.follower.followers_delta)))} note="시작·종료 경계를 모두 관측한 계정 합계" /><Kpi label="경계 관측 완료" value={`${rows.filter(row => row.posts.range_complete && row.profile.status === 'ok' && row.follower.status === 'ok').length} / ${rows.length}`} note="누락된 기록은 0으로 채우지 않습니다." /></div>
+      <section className="panel"><div className="panel-heading"><div><h2>계정별 기간 지표</h2><p>일부 관측값만 있는 계정은 부분 집계로 표시합니다.</p></div><span className="count">{rows.length}개 계정</span></div><div className="table-scroll"><table className="metrics-table"><caption className="sr-only">계정별 기간 지표</caption><thead><tr><th>계정</th><th>원글 조회 증가</th><th>프로필 관측 증가</th><th>팔로워 종료 수</th><th>팔로워 변화</th><th>관측 상태</th></tr></thead><tbody>{rows.map(row => {
+        const missing = row.connectionStatus === 'unavailable';
+        const complete = row.posts.range_complete && row.profile.status === 'ok' && row.follower.status === 'ok';
+        return <tr key={row.id}><th><span className="account-cell"><span className="avatar" style={{ background: row.color }}>{row.name[0]}</span><span>{row.name}<small>@{row.handle}</small></span></span></th><td className="numeric strong">{signed(row.posts.views_delta)}<small>{row.posts.measured_posts}개 원글 관측</small></td><td className="numeric">{signed(row.profile.value)}<small>{row.profile.status === 'partial' ? '부분 집계' : row.profile.status === 'unavailable' ? '비교 불가' : '경계 관측 완료'}</small></td><td className="numeric">{number(row.follower.followers_end)}</td><td className="numeric">{signed(row.follower.followers_delta)}</td><td><span className={`badge ${complete ? 'good' : 'warn'}`}>{missing ? '관측 없음' : complete ? '관측 완료' : '부분 집계'}</span></td></tr>;
+      })}</tbody></table></div></section>
+      <section className="panel"><div className="panel-heading"><div><h2>관측 기록 살펴보기</h2><p>계정별 계산 근거와 누락 사유를 확인하세요.</p></div></div><div className="observation-list">{rows.map(row => <details key={row.id}><summary>{row.name}<span>관측 근거 보기 +</span></summary><div className="observation-detail"><dl><div><dt>조회 증가 Top 1</dt><dd>{row.posts.top ? `${signed(row.posts.top.delta)}회 · 마지막 누적 ${number(row.posts.top.views)}회` : '관측된 원글 없음'}</dd></div><div><dt>프로필 관측 구간</dt><dd>{row.profile.observed_start ? new Date(row.profile.observed_start).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }) : '—'} ~ {row.profile.observed_at ? new Date(row.profile.observed_at).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }) : '—'} KST</dd></div><div><dt>프로필 초기화</dt><dd>{row.profile.resets}회 · 초기화 경계 누락 {row.profile.reset_gaps}회</dd></div></dl>{row.profile.reasons.map((reason: string) => <p key={reason} className="warning-note">{reason}</p>)}{row.posts.missing_posts > 0 && <p className="warning-note">원글 {row.posts.missing_posts}개의 비교 관측값이 부족합니다.</p>}<p className="muted">가상 게시물의 계산 기록입니다. 외부 게시물 링크는 제공하지 않습니다.</p></div></details>)}</div></section>
+      <div className="info-grid"><article><span>01</span><h3>관측 증가량</h3><p>저장된 관측값의 변화를 계산합니다. 게시물의 마지막 누적 조회와는 다릅니다.</p></article><article><span>02</span><h3>부분 집계</h3><p>경계 관측이나 초기화 전후 기록이 빠진 경우, 확인된 값만 보여줍니다.</p></article><article><span>03</span><h3>0과 비교 불가</h3><p>0은 관측된 변화가 없다는 뜻입니다. 대시(—)는 계산에 필요한 기록이 없다는 뜻입니다.</p></article></div>
+    </> : <Empty />)}
+  </>;
+}
